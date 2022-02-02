@@ -7,7 +7,7 @@
         <appender-ref ref="CONSOLE"/>
     </root>
 
-    <logger name="com.rbkmoney.xrates">
+    <logger name="dev.vality.xrates">
         <level value="debug"/>
     </logger>
 

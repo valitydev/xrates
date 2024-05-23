@@ -1,11 +1,13 @@
 package dev.vality.xrates.exchange.impl.provider.psb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.vality.adapter.common.secret.VaultSecretService;
 import dev.vality.xrates.domain.ExchangeRate;
 import dev.vality.xrates.exception.ProviderUnavailableResultException;
 import dev.vality.xrates.exchange.ExchangeProvider;
 import dev.vality.xrates.exchange.impl.provider.psb.data.PsbExchangeRootData;
 import dev.vality.xrates.exchange.impl.provider.psb.data.PsbPaymentSystem;
+import dev.vality.xrates.service.SecretService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -43,62 +45,59 @@ public class PsbExchangeProvider implements ExchangeProvider {
 
     private final ZoneId timezone;
 
-    private final String terminalId;
-
-    private final String secretKey;
-
     private final PsbPaymentSystem psbPaymentSystem;
 
     private final RestTemplate restTemplate;
 
     private final ObjectMapper objectMapper;
 
+    private final SecretService secretService;
+
     public PsbExchangeProvider(
-            String terminalId,
-            String secretKey,
             PsbPaymentSystem psbPaymentSystem,
             RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
-        this(DEFAULT_ENDPOINT, terminalId, secretKey, psbPaymentSystem, restTemplate, objectMapper);
+            ObjectMapper objectMapper,
+            SecretService secretService) {
+        this(DEFAULT_ENDPOINT, psbPaymentSystem, restTemplate, objectMapper, secretService);
     }
 
     public PsbExchangeProvider(
             String url,
-            String terminalId,
-            String secretKey,
             PsbPaymentSystem psbPaymentSystem,
             RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
-        this(url, DEFAULT_TIMEZONE, terminalId, secretKey, psbPaymentSystem, restTemplate, objectMapper);
+            ObjectMapper objectMapper,
+            SecretService secretService) {
+        this(url, DEFAULT_TIMEZONE, psbPaymentSystem, restTemplate, objectMapper, secretService);
     }
 
     public PsbExchangeProvider(
             String url,
             ZoneId timezone,
-            String terminalId,
-            String secretKey,
             PsbPaymentSystem psbPaymentSystem,
             RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            SecretService secretService) {
         this.url = url;
         this.timezone = timezone;
-        this.terminalId = terminalId;
-        this.secretKey = secretKey;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.psbPaymentSystem = psbPaymentSystem;
+        this.secretService = secretService;
     }
 
     @Override
     public List<ExchangeRate> getExchangeRates(Instant time) {
         log.info("Trying to get exchange rates from psb endpoint, url='{}', time='{}'", url, time);
         LocalDate date = time.atZone(timezone).toLocalDate();
+        String paymentSystem = psbPaymentSystem.getValue();
+        String terminalId = secretService.getTerminalId(paymentSystem);
+        String secretKey = secretService.getSecretKey(psbPaymentSystem.getValue());
 
         PsbExchangeRootData psbExchangeRootData = request(buildUrl(url, terminalId, secretKey, date));
         validateResponse(psbExchangeRootData);
 
         List<ExchangeRate> exchangeRates = psbExchangeRootData.getRates().stream()
-                .filter(currency -> psbPaymentSystem.getValue().equals(currency.getIps()))
+                .filter(currency -> paymentSystem.equals(currency.getIps()))
                 .map(currency -> new ExchangeRate(
                         CurrencyUnit.of(currency.getCurrencyCode()),
                         DESTINATION_CURRENCY_UNIT,

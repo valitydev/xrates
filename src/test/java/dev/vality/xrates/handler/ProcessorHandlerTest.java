@@ -10,6 +10,7 @@ import dev.vality.woody.thrift.impl.http.THSpawnClientBuilder;
 import dev.vality.xrates.exception.ProviderUnavailableResultException;
 import dev.vality.xrates.exception.UnknownSourceException;
 import dev.vality.xrates.service.ExchangeRateService;
+import dev.vality.xrates.service.SecretService;
 import org.apache.thrift.TException;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,9 +25,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
@@ -41,6 +43,17 @@ public class ProcessorHandlerTest {
     private ExchangeRateService exchangeRateService;
 
     private ProcessorSrv.Iface client;
+
+    @MockBean
+    private SecretService secretService;
+
+    @Before
+    public void setUp() {
+        String terminalId = "12345";
+        String secretKey = "C50E41160302E0F5D6D59F1AA3925C45";
+        when(secretService.getTerminalId(anyString())).thenReturn(terminalId);
+        when(secretService.getSecretKey(anyString())).thenReturn(secretKey);
+    }
 
     @Before
     public void setup() throws URISyntaxException {

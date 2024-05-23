@@ -8,6 +8,7 @@ import dev.vality.xrates.base.Rational;
 import dev.vality.xrates.base.TimestampInterval;
 import dev.vality.xrates.rate.*;
 import dev.vality.xrates.util.ProtoUtil;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -27,8 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
@@ -41,6 +41,16 @@ public class ExchangeRateServiceTest {
 
     @MockBean
     private AutomatonClient<Value, Change> automatonClient;
+    @MockBean
+    private  SecretService secretService;
+
+    @Before
+    public void setUp() {
+        String terminalId = "12345";
+        String secretKey = "C50E41160302E0F5D6D59F1AA3925C45";
+        when(secretService.getTerminalId(anyString())).thenReturn(terminalId);
+        when(secretService.getSecretKey(anyString())).thenReturn(secretKey);
+    }
 
     @Test
     public void testInitSourcesWhenMachineAlreadyExists() {

@@ -15,6 +15,7 @@ import dev.vality.xrates.exchange.impl.provider.cbr.CbrExchangeProvider;
 import dev.vality.xrates.exchange.impl.provider.psb.PsbExchangeProvider;
 import dev.vality.xrates.exchange.impl.provider.psb.data.PsbPaymentSystem;
 import dev.vality.xrates.rate.Change;
+import dev.vality.xrates.service.SecretService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -77,13 +78,18 @@ public class ApplicationConfig {
     public PsbExchangeProvider psbMastercardExchangeProvider(
             @Value("${sources.psb-mastercard.provider.url}") String url,
             @Value("${sources.psb-mastercard.provider.timezone}") ZoneId timezone,
-            @Value("${sources.psb-mastercard.provider.terminalId}") String terminalId,
-            @Value("${sources.psb-mastercard.provider.secretKey}") String secretKey,
             @Value("${sources.psb-mastercard.provider.paymentSystem}") PsbPaymentSystem paymentSystem,
             RestTemplate restTemplate,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            SecretService secretService
     ) {
-        return new PsbExchangeProvider(url, timezone, terminalId, secretKey, paymentSystem, restTemplate, objectMapper);
+        return new PsbExchangeProvider(
+                url,
+                timezone,
+                paymentSystem,
+                restTemplate,
+                objectMapper,
+                secretService);
     }
 
     @Bean
@@ -103,13 +109,18 @@ public class ApplicationConfig {
     public PsbExchangeProvider psbVisaExchangeProvider(
             @Value("${sources.psb-visa.provider.url}") String url,
             @Value("${sources.psb-visa.provider.timezone}") ZoneId timezone,
-            @Value("${sources.psb-visa.provider.terminalId}") String terminalId,
-            @Value("${sources.psb-visa.provider.secretKey}") String secretKey,
             @Value("${sources.psb-visa.provider.paymentSystem}") PsbPaymentSystem paymentSystem,
             RestTemplate restTemplate,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            SecretService secretService
     ) {
-        return new PsbExchangeProvider(url, timezone, terminalId, secretKey, paymentSystem, restTemplate, objectMapper);
+        return new PsbExchangeProvider(
+                url,
+                timezone,
+                paymentSystem,
+                restTemplate,
+                objectMapper,
+                secretService);
     }
 
     @Bean

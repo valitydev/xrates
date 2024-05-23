@@ -7,6 +7,7 @@ import dev.vality.woody.thrift.impl.http.THSpawnClientBuilder;
 import dev.vality.xrates.base.Rational;
 import dev.vality.xrates.base.TimestampInterval;
 import dev.vality.xrates.rate.*;
+import dev.vality.xrates.service.SecretService;
 import org.apache.thrift.TException;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +26,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
@@ -42,11 +45,18 @@ public class EventSinkHandlerTest {
 
     private EventSinkSrv.Iface client;
 
+    @MockBean
+    private SecretService secretService;
+
     @Before
     public void setup() throws URISyntaxException {
         client = new THSpawnClientBuilder()
                 .withAddress(new URI("http://localhost:" + port + "/v1/event_sink"))
                 .build(EventSinkSrv.Iface.class);
+        String terminalId = "12345";
+        String secretKey = "C50E41160302E0F5D6D59F1AA3925C45";
+        when(secretService.getTerminalId(anyString())).thenReturn(terminalId);
+        when(secretService.getSecretKey(anyString())).thenReturn(secretKey);
     }
 
 

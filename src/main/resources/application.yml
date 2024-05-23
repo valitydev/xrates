@@ -76,3 +76,7 @@ sources:
       value: "00 01 * * *"
       timezone: Europe/Moscow
       delay: PT-1H
+
+vault:
+  uri: https://vault.empayre.com:443
+  token: token

@@ -8,6 +8,7 @@ import dev.vality.xrates.rate.CurrencyNotFound;
 import dev.vality.xrates.rate.QuoteNotFound;
 import dev.vality.xrates.rate.RatesSrv;
 import dev.vality.xrates.service.ExchangeRateService;
+import dev.vality.xrates.service.SecretService;
 import org.apache.thrift.TException;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,9 @@ import java.net.URISyntaxException;
 import java.time.Instant;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 
 @RunWith(SpringRunner.class)
@@ -39,11 +42,18 @@ public class RatesHandlerTest {
     @MockBean
     private ExchangeRateService exchangeRateService;
 
+    @MockBean
+    private SecretService secretService;
+
     @Before
     public void setup() throws URISyntaxException {
         client = new THSpawnClientBuilder()
                 .withAddress(new URI("http://localhost:" + port + "/v1/rates"))
                 .build(RatesSrv.Iface.class);
+        String terminalId = "12345";
+        String secretKey = "C50E41160302E0F5D6D59F1AA3925C45";
+        when(secretService.getTerminalId(anyString())).thenReturn(terminalId);
+        when(secretService.getSecretKey(anyString())).thenReturn(secretKey);
     }
 
     @Test(expected = QuoteNotFound.class)

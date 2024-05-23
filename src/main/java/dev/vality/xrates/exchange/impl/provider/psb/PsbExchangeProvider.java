@@ -91,7 +91,7 @@ public class PsbExchangeProvider implements ExchangeProvider {
         LocalDate date = time.atZone(timezone).toLocalDate();
         String paymentSystem = psbPaymentSystem.getValue();
         String terminalId = secretService.getTerminalId(paymentSystem);
-        String secretKey = secretService.getSecretKey(psbPaymentSystem.getValue());
+        String secretKey = secretService.getSecretKey(paymentSystem);
 
         PsbExchangeRootData psbExchangeRootData = request(buildUrl(url, terminalId, secretKey, date));
         validateResponse(psbExchangeRootData);
